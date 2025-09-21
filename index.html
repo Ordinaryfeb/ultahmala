@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kue Ulang Tahun Interaktif</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #ffebee 0%, #f8bbd0 50%, #f48fb1 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            color: #880e4f;
+        }
+
+        .container {
+            text-align: center;
+            padding: 20px;
+            max-width: 800px;
+            width: 100%;
+        }
+
+        .welcome-message {
+            margin-bottom: 40px;
+            animation: fadeIn 2s ease-out;
+        }
+
+        h1 {
+            font-size: 3em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+            color: #880e4f;
+        }
+
+        p {
+            font-size: 1.2em;
+            margin-bottom: 20px;
+            color: #ad1457;
+        }
+
+        .start-button {
+            background: linear-gradient(45deg, #ec407a, #d81b60);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.2em;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(216, 27, 96, 0.3);
+        }
+
+        .start-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(216, 27, 96, 0.4);
+        }
+
+        .start-button:active {
+            transform: translateY(1px);
+        }
+
+        /* Birthday Cake Styles */
+        .birthday-cake-container {
+            position: relative;
+            margin: 40px auto;
+            perspective: 1000px;
+            display: none;
+        }
+
+        .cake {
+            position: relative;
+            width: 300px;
+            height: 200px;
+            margin: 0 auto;
+            transform-style: preserve-3d;
+            animation: cakeAppear 1s ease-out forwards;
+        }
+
+        .cake-base {
+            position: absolute;
+            bottom: 0;
+            left: 25px;
+            width: 250px;
+            height: 120px;
+            background: linear-gradient(to right, #f8bbd0, #f48fb1, #f06292);
+            border-radius: 20px 20px 10px 10px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+
+        .cake-top {
+            position: absolute;
+            bottom: 120px;
+            left: 50px;
+            width: 200px;
+            height: 80px;
+            background: linear-gradient(to right, #ffcdd2, #f8bbd0);
+            border-radius: 50% 50% 0 0;
+            box-shadow: 0 -5px 15px rgba(0,0,0,0.1);
+        }
+
+        .candle-container {
+            position: absolute;
+            top: -40px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 35px;
+            z-index: 10;
+        }
+
+        .candle {
+            width: 16px;
+            height: 60px;
+            background: linear-gradient(to bottom, #ffffff, #e0f7fa);
+            border-radius: 8px;
+            position: relative;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .candle:hover {
+            transform: scale(1.05);
+        }
+
+        .flame {
+            position: absolute;
+            top: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 20px;
+            height: 40px;
+            background: linear-gradient(to bottom, #ffeb3b, #ff9800, #f44336);
+            border-radius: 50% 50% 20% 20%;
+            box-shadow: 0 0 20px #ff9800, 0 0 40px #ffeb3b;
+            animation: flameFlicker 0.8s infinite alternate ease-in-out;
+            transition: all 0.5s ease;
+        }
+
+        .candle.clicked .flame {
+            opacity: 0;
+            transform: translateX(-50%) scale(0);
+        }
+
+        .candle.clicked {
+            background: linear-gradient(to bottom, #cccccc, #e0e0e0);
+        }
+
+        .decoration {
+            position: absolute;
+            width: 300px;
+            height: 10px;
+            bottom: 110px;
+            left: 0;
+            display: flex;
+            justify-content: space-around;
+        }
+
+        .sprinkle {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #ec407a;
+            animation: sprinkleFloat 3s infinite ease-in-out;
+        }
+
+        .sprinkle:nth-child(2n) {
+            background: #f48fb1;
+            animation-delay: 0.5s;
+        }
+
+        .sprinkle:nth-child(3n) {
+            background: #ffeb3b;
+            animation-delay: 1s;
+        }
+
+        /* Message and Progress */
+        .message {
+            margin-top: 30px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 20px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            animation: fadeIn 1s ease-out;
+            display: none;
+        }
+
+        .progress-container {
+            width: 300px;
+            height: 20px;
+            background: #f5f5f5;
+            border-radius: 10px;
+            margin: 20px auto;
+            overflow: hidden;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.2);
+            display: none;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(to right, #f48fb1, #ec407a);
+            border-radius: 10px;
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+
+        /* Confetti */
+        .confetti-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 100;
+            display: none;
+        }
+
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: #f44336;
+            opacity: 0;
+        }
+
+        .confetti:nth-child(2n) {
+            background: #ffeb3b;
+            width: 8px;
+            height: 8px;
+        }
+
+        .confetti:nth-child(3n) {
+            background: #ec407a;
+            width: 12px;
+            height: 12px;
+        }
+
+        .confetti:nth-child(4n) {
+            background: #ab47bc;
+            width: 9px;
+            height: 9px;
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes cakeAppear {
+            from { 
+                opacity: 0;
+                transform: translateY(50px) rotateX(30deg);
+            }
+            to { 
+                opacity: 1;
+                transform: translateY(0) rotateX(0);
+            }
+        }
+
+        @keyframes flameFlicker {
+            0%, 100% { 
+                transform: translateX(-50%) scale(1);
+                box-shadow: 0 0 20px #ff9800, 0 0 40px #ffeb3b;
+            }
+            50% { 
+                transform: translateX(-50%) scale(1.1) translateY(-2px);
+                box-shadow: 0 0 25px #ff9800, 0 0 50px #ffeb3b;
+            }
+        }
+
+        @keyframes sprinkleFloat {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+
+        @keyframes confettiFall {
+            0% { 
+                transform: translateY(-100px) rotate(0deg);
+                opacity: 1;
+            }
+            100% { 
+                transform: translateY(100vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .cake {
+                transform: scale(0.8);
+            }
+            
+            h1 {
+                font-size: 2.5em;
+            }
+            
+            .candle-container {
+                gap: 25px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .cake {
+                transform: scale(0.7);
+            }
+            
+            h1 {
+                font-size: 2em;
+            }
+            
+            .candle-container {
+                gap: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    
+    <div class="container">
+        <div class="welcome-message">
+            <h1>HAPPY BIRTHDAY MALAA</h1>
+            <p>AKU ADA KUEE BUAT KMM</p>
+            <button class="start-button" id="startButton">Kue nya disiniii</button>
+        </div>
+
+        <div class="birthday-cake-container" id="cakeContainer">
+            <div class="cake">
+                <div class="cake-base"></div>
+                <div class="cake-top"></div>
+                <div class="decoration">
+                    <div class="sprinkle"></div>
+                    <div class="sprinkle"></div>
+                    <div class="sprinkle"></div>
+                    <div class="sprinkle"></div>
+                    <div class="sprinkle"></div>
+                    <div class="sprinkle"></div>
+                </div>
+                <div class="candle-container">
+                    <div class="candle" id="candle1">
+                        <div class="flame"></div>
+                    </div>
+                    <div class="candle" id="candle2">
+                        <div class="flame"></div>
+                    </div>
+                    <div class="candle" id="candle3">
+                        <div class="flame"></div>
+                    </div>
+                    <div class="candle" id="candle4">
+                        <div class="flame"></div>
+                    </div>
+                    <div class="candle" id="candle5">
+                        <div class="flame"></div>
+                    </div>
+                </div>
+              
+            </div>
+              <p>Ayooo tiup lilin nyaa</p>
+        </div>
+
+        <div class="progress-container" id="progressContainer">
+            <div class="progress-bar" id="progressBar"></div>
+        </div>
+
+        <div class="message" id="message">
+            <h2>Happy Birthday MALAAAAAAAA YEEEEAAYYY-!!</h2>
+            <p>Semoga Mala selalu bahagia yaawwww , wish u all the best-! i got something for u taawww, klik tombol di bawah ini yaaa-!
+            </p>
+            <a href="hbdmala.html" class="start-button" id="startButton">Buat Kamuuu</a>
+        </div>
+    </div>
+
+    <div class="confetti-container" id="confettiContainer"></div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const startButton = document.getElementById('startButton');
+            const cakeContainer = document.getElementById('cakeContainer');
+            const candles = document.querySelectorAll('.candle');
+            const progressContainer = document.getElementById('progressContainer');
+            const progressBar = document.getElementById('progressBar');
+            const message = document.getElementById('message');
+            const confettiContainer = document.getElementById('confettiContainer');
+            
+            let extinguishedCount = 0;
+            const totalCandles = candles.length;
+            
+            // Setup candles with random click requirements
+            candles.forEach((candle, index) => {
+                const clicksRequired = Math.floor(Math.random() * 3) + 3; // 3-5 clicks
+                candle.dataset.clicksRequired = clicksRequired;
+                candle.dataset.currentClicks = 0;
+                
+                // Add click event listener
+                candle.addEventListener('click', function() {
+                    handleCandleClick(this);
+                });
+            });
+
+            // Start button click handler
+            startButton.addEventListener('click', function() {
+                this.style.display = 'none';
+                document.querySelector('.welcome-message p').style.display = 'none';
+                cakeContainer.style.display = 'block';
+                progressContainer.style.display = 'block';
+            });
+
+            // Candle click handler
+            function handleCandleClick(candle) {
+                if (candle.classList.contains('clicked')) return;
+                
+                let currentClicks = parseInt(candle.dataset.currentClicks);
+                const clicksRequired = parseInt(candle.dataset.clicksRequired);
+                
+                currentClicks++;
+                candle.dataset.currentClicks = currentClicks;
+                
+                // Visual feedback for click
+                candle.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    candle.style.transform = 'scale(1.05)';
+                }, 100);
+                
+                if (currentClicks >= clicksRequired) {
+                    // Extinguish the candle
+                    candle.classList.add('clicked');
+                    extinguishedCount++;
+                    
+                    // Update progress
+                    updateProgress();
+                    
+                    // Check if all candles are extinguished
+                    if (extinguishedCount === totalCandles) {
+                        celebrate();
+                    }
+                }
+            }
+
+            // Update progress bar
+            function updateProgress() {
+                const progress = (extinguishedCount / totalCandles) * 100;
+                progressBar.style.width = progress + '%';
+            }
+
+            // Celebration function when all candles are extinguished
+            function celebrate() {
+                // Show message
+                message.style.display = 'block';
+                
+                // Create confetti
+                createConfetti();
+                
+                // Add final celebration effects
+                setTimeout(() => {
+                    cakeContainer.style.transform = 'scale(1.1)';
+                    cakeContainer.style.transition = 'transform 0.5s ease';
+                }, 500);
+            }
+
+            // Create confetti effect
+            function createConfetti() {
+                confettiContainer.style.display = 'block';
+                const confettiCount = 150;
+                
+                for (let i = 0; i < confettiCount; i++) {
+                    const confetti = document.createElement('div');
+                    confetti.classList.add('confetti');
+                    
+                    // Random position and properties
+                    const left = Math.random() * 100;
+                    const rotation = Math.random() * 360;
+                    const size = 5 + Math.random() * 10;
+                    const duration = 2 + Math.random() * 3;
+                    const delay = Math.random() * 2;
+                    
+                    confetti.style.left = left + 'vw';
+                    confetti.style.width = size + 'px';
+                    confetti.style.height = size + 'px';
+                    
+                    // Random color from pink palette
+                    const colors = ['#f48fb1', '#ec407a', '#d81b60', '#ad1457', '#f06292'];
+                    confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                    
+                    // Animation
+                    confetti.style.animation = `confettiFall ${duration}s ease-in ${delay}s forwards`;
+                    
+                    confettiContainer.appendChild(confetti);
+                    
+                    // Remove confetti after animation
+                    setTimeout(() => {
+                        confetti.remove();
+                    }, (duration + delay) * 1000);
+                }
+            }
+        });
+    </script>
+</body>
+</html>
